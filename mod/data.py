@@ -17,6 +17,12 @@ class MData:
         for member in server.members:
             self.users[member.id] = self.User(member)
 
+        self.roles = {}
+
+        for role in server.roles:
+            self.roles[role.name] = role
+
+
     async def ainit(self):
         await self.load_data()
 
@@ -152,7 +158,28 @@ class MData:
         new_role = await self.users[id].update_role(self.bot)
 
         if new_role is not None:
-            print("(Sending gongrats to x for their new role " + new_role.name + ")" )
+            embed = discord.Embed(title="Gongratulations", description="You are now a '" + str(new_role.name) + "'", color=0x00ff00)
+            embed.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            if self.users[id].qmcount:
+                embed.add_field(name="Väärt sõnumeid",
+                                value=str(round(self.users[id].qmcount/self.users[id].mcount*100))+"% ("+str(self.users[id].qmcount)+")",inline=True)
+                embed.add_field(name="Kõik sõnumid",
+                                value=str(self.users[id].mcount), inline=True)
+                embed.add_field(name="Keskmine tähtede arv",
+                                value=str(round(self.users[id].qccount/self.users[id].qmcount)), inline=True)
+
+            if self.roles['lennu'] in self.users[id].member.roles:
+                embed.set_image(url='https://i.imgur.com/wni7YGI.png')
+            elif self.roles['saabas'] in self.users[id].member.roles:
+                embed.set_image(url='https://i.imgur.com/gSayA5K.png')
+            elif self.roles['mard'] in self.users[id].member.roles:
+                embed.set_image(url='https://i.imgur.com/1Zy1CvG.png')
+            elif self.roles['volga'] in self.users[id].member.roles:
+                embed.set_image(url='https://i.imgur.com/RdHx5qT.png')
+
+            embed.set_footer(text="Lennusaabas", icon_url=self.bot.user.avatar_url)
+
+            await self.bot.send_message(message.channel, embed=embed)
 
     async def handle_member_join(self, member):
         id = member.id
