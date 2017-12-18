@@ -3,6 +3,7 @@ import discord
 import os
 import datetime
 import sqlite3
+import pickle
 
 
 class MData:
@@ -31,6 +32,8 @@ class MData:
         utctime = None
         id = self.server.id
 
+        print("MDATA: Loading data for " + 'data/' + str(id) + '.db')
+
         if os.path.isfile('data/' + str(id) + '.db'):
             conn = sqlite3.connect('data/' + str(id) + '.db')
             c = conn.cursor()
@@ -38,7 +41,7 @@ class MData:
             c.execute('''SELECT id, mcount, ccount, qmcount, qccount FROM users''')
             all_rows = c.fetchall()
             for row in all_rows:
-                _id = row[0]
+                _id = str(row[0])
                 _mcount = row[1]
                 _ccount = row[2]
                 _qmcount = row[3]
@@ -55,6 +58,8 @@ class MData:
             utctime = metadata[0]
 
             conn.close()
+        else:
+            print("MDATA: no database found - " + 'data/' + str(id) + '.db')
 
         await self.update_stats(utctime)
 
@@ -144,7 +149,10 @@ class MData:
             self.users[id].qmcount += 1
             self.users[id].qccount += len(message.content)
 
-        await self.users[id].update_role(self.bot)
+        new_role = await self.users[id].update_role(self.bot)
+
+        if new_role is not None:
+            print("(Sending gongrats to x for their new role " + new_role.name + ")" )
 
     async def handle_member_join(self, member):
         id = member.id
@@ -168,7 +176,9 @@ class MData:
             self.ccount  = 0  # Total character count
 
         async def update_role(self, bot):
-            print(self.member.name)
+            highest_role = None
+            is_role_fix  = False
+
             for level in cfg.threshold:
                 role_to = None
                 for r in self.member.server.roles:
@@ -176,12 +186,29 @@ class MData:
                         role_to = r
                         break
 
+                is_role = (role_to in self.member.roles)
+
+                if is_role and highest_role is None:
+                    is_role_fix = True
+
                 if level['role'] is None or level['role'] in [y.name for y in self.member.roles]:
-                    if self.qmcount >= level['count']:
-                        await bot.add_roles(self.member, role_to)
-                        print("MDATA: Added role '" + str(role_to.name) + "' to user '" + str(self.member.name) + "'")
+                    if not is_role:
+                        if self.qmcount >= level['count']:
+                            await bot.add_roles(self.member, role_to)
+                            print("MDATA: Added role '" + str(role_to.name) + "' to user '" + str(self.member.name) + "' - " + str(self.qmcount))
+
+                            if highest_role is None:
+                                highest_role = role_to
+
+                            continue
+                    else:
                         continue
 
-                if role_to in self.member.roles:
+                if is_role:
                     await bot.remove_roles(self.member, role_to)
-                    print("MDATA: Removed role '" + str(role_to.name) + "' from user '" + str(self.member.name) + "'")
+                    print("MDATA: Removed role '" + str(role_to.name) + "' from user '" + str(self.member.name) + "' - " + str(self.qmcount))
+
+            if not is_role_fix:
+                return highest_role
+            else:
+                return None
