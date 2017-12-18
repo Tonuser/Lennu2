@@ -24,6 +24,9 @@ class Server:
         self.mcommand = MCommand(self.bot, self.server, self.mdata)
         await self.mcommand.ainit()
 
+        game = discord.Game(name='Saabas', url='https://www.kapo.ee/1', type=1)
+        await self.bot.change_presence(game=game)
+
         self.init = True
 
     async def handle_message(self, message):

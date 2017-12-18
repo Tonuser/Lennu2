@@ -128,12 +128,14 @@ class MData:
             if channel.type == discord.ChannelType.text and channel.permissions_for(self.server.me).read_message_history:
                 n += 1
                 print(str(channel) + " - " + str(n))
+
                 if str(channel) in cfg.qualityc:
                     async for msg in self.bot.logs_from(channel, limit=1000000, after=time):
                         id = msg.author.id
                         if id in self.users:
-                            self.users[id].qmcount += 1
-                            self.users[id].qccount += len(msg.content)
+                            if len(msg.content) > 20:
+                                self.users[id].qmcount += 1
+                                self.users[id].qccount += len(msg.content)
                             self.users[id].mcount += 1
                             self.users[id].ccount += len(msg.content)
                 else:
@@ -151,15 +153,16 @@ class MData:
 
         self.users[id].mcount += 1
         self.users[id].ccount += len(message.content)
-        if str(message.channel) in cfg.qualityc:
+        if str(message.channel) in cfg.qualityc and len(message.content) > 20:
             self.users[id].qmcount += 1
             self.users[id].qccount += len(message.content)
 
         new_role = await self.users[id].update_role(self.bot)
 
         if new_role is not None:
-            embed = discord.Embed(title="Gongratulations", description="You are now a '" + str(new_role.name) + "'", color=0x00ff00)
-            embed.set_author(name=message.author.name,icon_url=message.author.avatar_url)
+            embed = discord.Embed(title="Tubli töö, goi", description="Sa oled nüüd tase " + str(new_role.name) + "", color=0x00ff00, url='https://kapo.ee/')
+            embed.set_author(name=message.author.name)
+            embed.set_image(url=message.author.avatar_url)
             if self.users[id].qmcount:
                 embed.add_field(name="Väärt sõnumeid",
                                 value=str(round(self.users[id].qmcount/self.users[id].mcount*100))+"% ("+str(self.users[id].qmcount)+")",inline=True)
@@ -169,15 +172,13 @@ class MData:
                                 value=str(round(self.users[id].qccount/self.users[id].qmcount)), inline=True)
 
             if self.roles['lennu'] in self.users[id].member.roles:
-                embed.set_image(url='https://i.imgur.com/wni7YGI.png')
+                embed.set_footer(text='Lennu', icon_url='https://i.imgur.com/wni7YGI.png')
             elif self.roles['saabas'] in self.users[id].member.roles:
-                embed.set_image(url='https://i.imgur.com/gSayA5K.png')
+                embed.set_footer(text='Saabas', icon_url='https://i.imgur.com/gSayA5K.png')
             elif self.roles['mard'] in self.users[id].member.roles:
-                embed.set_image(url='https://i.imgur.com/1Zy1CvG.png')
+                embed.set_footer(text='Mard', icon_url='https://i.imgur.com/1Zy1CvG.png')
             elif self.roles['volga'] in self.users[id].member.roles:
-                embed.set_image(url='https://i.imgur.com/RdHx5qT.png')
-
-            embed.set_footer(text="Lennusaabas", icon_url=self.bot.user.avatar_url)
+                embed.set_footer(text='Volga', icon_url='https://i.imgur.com/RdHx5qT.png')
 
             await self.bot.send_message(message.channel, embed=embed)
 

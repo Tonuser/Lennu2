@@ -16,6 +16,16 @@ class MCommand:
     async def handle_command(self, message):
         print(message.content)
 
+    def split_line(text):
+
+        # split the text
+        words = text.split()
+
+        # for each word in the line:
+        for word in words:
+            # print the word
+            print(word)
+
     @commands.group(pass_context=True, no_pm=True)
     async def test(self, ctx):
         """This is the description of the """

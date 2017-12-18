@@ -1,5 +1,6 @@
 
 import discord
+from discord.ext import commands
 import cfg
 from server import Server
 import atexit
@@ -12,7 +13,7 @@ handler = logging.FileHandler(filename='data/discord.log', encoding='utf-8', mod
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-bot = discord.Client()
+bot = commands.Bot(command_prefix='?') #discord.Client()
 servers = {}
 
 
@@ -22,6 +23,9 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------------')
+
+    game = discord.Game(name='Robot laeb...',url='https://www.politsei.ee/', type=1)
+    await bot.change_presence(game=game)
 
     for server in bot.servers:
         n = Server(bot, server)
