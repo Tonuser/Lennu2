@@ -168,6 +168,7 @@ class MData:
             self.ccount  = 0  # Total character count
 
         async def update_role(self, bot):
+            print(self.member.name)
             for level in cfg.threshold:
                 role_to = None
                 for r in self.member.server.roles:

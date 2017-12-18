@@ -43,7 +43,7 @@ async def on_server_remove(server):
 
 @bot.event
 async def on_message(message):
-    if message.type == discord.ChannelType.text:
+    if message.channel.type == discord.ChannelType.text:
         key = hash(message.server)
 
         if servers[key].init:

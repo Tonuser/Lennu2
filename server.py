@@ -31,6 +31,7 @@ class Server:
             await self.mcommand.handle_command(message)
         else:
             await self.mdata.handle_message(message)
+            print("A message")
 
     async def handle_member_join(self, member):
         await self.mdata.handle_member_join(member)
