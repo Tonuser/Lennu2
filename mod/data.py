@@ -69,19 +69,17 @@ class MData:
             conn = sqlite3.connect('data/' + str(id) + '.db')
             c = conn.cursor()
 
-            # Create a table
+            # Create tables
             c.execute('''
                             CREATE TABLE IF NOT EXISTS users
                             (id BIGINT, mcount INT, ccount BIGINT, qmcount INT, qccount BIGINT, name TEXT)
                             ''')
-            c.execute('''DELETE FROM users''')
             c.execute('''
                                     CREATE TABLE IF NOT EXISTS metadata
                                     (time TEXT)
                                     ''')
-            c.execute('''DELETE FROM metadata''')
 
-            # Insert a row of data
+            # Insert user data
             to_insert = set()
             for key in self.users:
                 member = self.users[key]
@@ -97,7 +95,6 @@ class MData:
 
             # Save
             conn.commit()
-
             conn.close()
 
             print("MDATA: Saved")
